@@ -1,0 +1,7 @@
+*.log
+*.d
+*.o
+*.swp
+.ycm_extra_conf.py
+**/build/
+**/log/
