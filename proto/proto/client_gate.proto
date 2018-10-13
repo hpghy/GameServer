@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+import "proto/common.proto";
+
+package proto;
+option cc_generic_services = true;
+option py_generic_services = true;
+
+message SessionSeed
+{
+    uint64 seed = 1;
+}
+
+message EncryptKeyStr
+{
+    bytes encrypt_key_str = 1;     // EncryptKey公钥加密后的字符串
+}
+message EncryptKey
+{
+    bytes random_header = 1;
+    bytes encrypt_key = 2;         // 会话密码
+    uint64 seed = 3;
+    bytes random_tail = 4;
+}
+
+service IGateService
+{
+    // 客户端向gate请求seed
+    rpc sesionSeedRequest(None) returns(None);
+    // 客户端向gate发送会话密码
+    rpc encryptKeyRequest(EncryptKeyStr) returns(None);
+    // 客户端请求登入游戏
+    rpc loginRequest(LoginRequest) returns(None);
+    rpc callEntityRpc(RpcMessage) returns(None);
+}
+
+service IClientService
+{
+    // gate向client发送seed
+    rpc sessionSeedReply(None) returns(None);
+    rpc encryptKeyReply(None) returns(None);
+    rpc loginReply(LoginReply) returns(None);
+    rpc callEntityRpc(RpcMessage) returns(None);
+}

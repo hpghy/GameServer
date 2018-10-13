@@ -1,0 +1,19 @@
+{
+    "common":
+    {
+    },
+    "game1":
+    {
+        "host": "127.0.0.1",
+        "port": 7001,
+        "http_host": "127.0.0.1",
+        "http_port": 0
+    },
+    "game2":
+    {
+        "host": "127.0.0.1",
+        "port": 7002,
+        "http_host": "127.0.0.1",
+        "http_port": 0
+    }
+}

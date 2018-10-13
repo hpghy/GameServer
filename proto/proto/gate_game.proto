@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+import "proto/common.proto";
+
+package proto;
+option cc_generic_services = true;
+option py_generic_services = true;
+
+service IGameService
+{
+    rpc loginRequest(LoginRequest) returns(None);
+    rpc callEntityRpc(RpcMessage) returns(None);
+}
+
+service IGameClientService
+{
+    rpc loginReply(LoginReply) returns(None);
+    rpc callEntityRpc(RpcMessage) returns(None);
+}

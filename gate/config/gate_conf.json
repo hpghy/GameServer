@@ -1,0 +1,20 @@
+{
+    "common":
+    {
+        "kcp_enabled": false,
+        "compress_enabled": false,
+        "encryption_enabled": false
+    },
+    "gate1":
+    {
+        "host": "127.0.0.1",
+        "port": 6001,
+        "http_host": "127.0.0.1",
+        "http_port": 6011
+    },
+    "game1":
+    {
+        "host": "127.0.0.1",
+        "port": 7001
+    }
+}

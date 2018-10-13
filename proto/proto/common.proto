@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package proto;
+message None {}
+
+// gate需要根据设备信息转发来自game的rpc请求
+message DeviceInfo
+{
+    string addr = 1;                // ip:port格式
+    bytes deviceid = 2;
+    uint32 sessionid = 3;
+}
+
+message LoginRequest
+{
+    DeviceInfo device_info = 1;
+    uint32 login_type = 2;          // 登入、重连等类型
+}
+message LoginReply
+{
+    DeviceInfo device_info = 1;
+    uint32 retcode = 2;              // 是否成功
+    bytes player_data = 3;          // 玩家数据
+}
+
+message RpcMessage
+{
+    DeviceInfo device_info = 1;
+    string method = 2;
+    uint32 id = 3;
+    bytes params = 4;
+}
+
