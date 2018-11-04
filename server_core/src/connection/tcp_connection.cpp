@@ -19,8 +19,8 @@
 #include "service/request_queue.h"
 #include "util/util.h"
 
-TcpConnection::TcpConnection(boost::asio::io_service& io_service, std::weak_ptr<Server> server)
-    : Connection(io_service, server),
+TcpConnection::TcpConnection(boost::asio::io_service& io_service, std::weak_ptr<Server> server_wptr)
+    : Connection(io_service, server_wptr),
       socket_(io_service),
       recv_buffer_(2048)
 {
@@ -86,12 +86,12 @@ void TcpConnection::handleReceive(const boost_err& ec, std::size_t length)
         return;
     }
 
-    auto channel = getChannel().lock();
-    if (!channel)
+    auto channel_ptr = getChannel().lock();
+    if (!channel_ptr)
     {
         ERROR_LOG << "TcpConnection channel_ptr is null";
     }
-    else if (!channel->handleData(recv_buffer_.data(), length))
+    else if (!channel_ptr->handleData(recv_buffer_.data(), length))
     {
         ERROR_LOG << "TcpConnection handle_data failed...";
     }
@@ -101,7 +101,7 @@ void TcpConnection::handleReceive(const boost_err& ec, std::size_t length)
     }
 }
 
-void TcpConnection::doAsyncSendData(std::shared_ptr<std::string> data)
+void TcpConnection::doAsyncSendData(std::shared_ptr<std::string> data_ptr)
 {
     if (isClosed())
     {
@@ -114,8 +114,8 @@ void TcpConnection::doAsyncSendData(std::shared_ptr<std::string> data)
     //   但很可能两个异步写操作实际写入顺序还是有问题。所以需要保证：
     //   一个异步写操作完成后才能发起下一个异步写请求
     //   有时间看boost asio相关源代码
-    data_queue_.push_back(data);
-    if (!sending_)
+    data_queue_.push_back(data_ptr);
+    if (!is_sending_)
     {
         startAsyncSend();
     }
@@ -128,7 +128,7 @@ void TcpConnection::startAsyncSend()
         WARN_LOG << "socket has been closed";
         return;
     }
-    sending_ = true;
+    is_sending_ = true;
     sending_queue_.clear();
 
     // 把缓存中的数据设置成正在异步发送
@@ -172,7 +172,7 @@ void TcpConnection::handleAsyncWrite(const boost_err& ec, std::size_t bytes)
     if (data_queue_.empty())
     {
         // 完成异步写操作
-        sending_ = false;
+        is_sending_ = false;
     }
     else
     {

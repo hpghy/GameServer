@@ -66,11 +66,11 @@ bool MobileClient::start()
                                         std::placeholders::_1));
     client_->asyncConnect();
 
-    work_ = std::make_shared<boost::asio::io_service::work>(io_service_);
+    work_ptr_ = std::make_shared<boost::asio::io_service::work>(io_service_);
     auto self(shared_from_this());
     for (uint32_t idx = 0; idx < io_thread_num; ++idx)
     {
-        io_threads_.emplace_back([self]() {self->io_service_.run();});
+        io_threads_vec_.emplace_back([self]() {self->io_service_.run();});
     }
     return true;
 }
@@ -94,13 +94,13 @@ void MobileClient::run()
     }
 
     // stop service, 使得io线程函数结束
-    work_.reset();
+    work_ptr_.reset();
     io_service_.stop();
 
     // 等待io线程的正常结束
-    for (size_t idx = 0; idx < io_threads_.size(); ++idx)
+    for (auto& thread : io_threads_vec_)
     {
-        io_threads_[idx].join();
+        thread.join();
     }
 
     service_.reset();

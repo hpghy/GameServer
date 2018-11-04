@@ -33,13 +33,13 @@ class Server: private boost::noncopyable, public std::enable_shared_from_this<Se
         Server(boost::asio::io_service&);
         virtual ~Server() = default;
 
-        inline void setMobileServer(std::shared_ptr<MobileServer> mobile_server)
+        inline void setMobileServer(std::shared_ptr<MobileServer> mobile_server_ptr)
         {
-            mobile_server_ = mobile_server;
+            mobile_server_wptr_ = mobile_server_ptr;
         }
         inline MobileServerWPtr getMobileServer()
         {
-            return mobile_server_;
+            return mobile_server_wptr_;
         }
 
         // bind/listen/start 在io线程创建前执行
@@ -54,8 +54,8 @@ class Server: private boost::noncopyable, public std::enable_shared_from_this<Se
         bool isStopped() { return stopped_; }
 
         // 在主线程中执行
-        virtual void onConnected(ConnectionPtr conn);
-        virtual void onDisconnected(ConnectionPtr conn);
+        virtual void onConnected(ConnectionPtr conn_ptr);
+        virtual void onDisconnected(ConnectionPtr conn_ptr);
 
     protected:
         boost::asio::io_service& getIoService() { return io_service_; }
@@ -64,7 +64,7 @@ class Server: private boost::noncopyable, public std::enable_shared_from_this<Se
 
     private:
         boost::asio::io_service&        io_service_;
-        MobileServerWPtr     mobile_server_;
+        MobileServerWPtr     mobile_server_wptr_;
         std::string          host_;
         uint16_t             port_;
         volatile bool        stopped_ = true;       // 主线程io线程都会访问

@@ -29,21 +29,20 @@ class IService;
 using IServicePtr = std::shared_ptr<IService>;
 using IServiceWptr = std::weak_ptr<IService>;
 
-class RpcChannel: public pb::RpcChannel,
-    public std::enable_shared_from_this<RpcChannel>
+class RpcChannel: public pb::RpcChannel, public std::enable_shared_from_this<RpcChannel>
 {
     public:
-        RpcChannel(ConnectionPtr conn);
-        virtual ~RpcChannel();
+        RpcChannel(ConnectionPtr conn_ptr);
+        virtual ~RpcChannel() = default;
 
         const std::string& getRemoteAddr() const;
         const std::string& getRemoteIp() const;
         uint16_t getRemotePort() const;
 
         // 主线程执行
-        void setService(IServicePtr service);
+        void setService(IServicePtr service_ptr);
         IServiceWptr getService();
-        ConnectionPtr getConnection() { return conn_; }
+        ConnectionPtr getConnection() { return conn_ptr_; }
 
         virtual void CallMethod(const pb::MethodDescriptor* method,
                                 pb::RpcController* controller,
@@ -52,13 +51,13 @@ class RpcChannel: public pb::RpcChannel,
                                 pb::Closure* done);
 
         bool handleData(const char*, std::size_t);
-        bool onRequest(request&);
+        bool onRequest(Request&);
         virtual void onRpcMessage(const pb::MethodDescriptor* method, pb::Message* message);
 
     protected:
-        IServiceWptr 	service_ptr_;
-        ConnectionPtr 	conn_;
-        std::shared_ptr<request_parser>		parser_;
+        IServiceWptr 	service_wptr_;
+        ConnectionPtr 	conn_ptr_;
+        std::shared_ptr<RequestParser>		parser_ptr_;
 };
 using RpcChannelPtr = std::shared_ptr<RpcChannel>;
 

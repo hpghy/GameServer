@@ -51,7 +51,7 @@ void GameClientMgr::addGameConfig(const vector<ServerConfig>& config_vec)
 // 添加一个GameServer配置
 void GameClientMgr::addGameConfig(const ServerConfig& config)
 {
-    if (!game_config_map_.insert(std::make_pair(config.name, config)).second)
+    if (!game_config_map_.emplace(config.name, config).second)
     {
         WARN_LOG << "addGameConfig " << config.name << " duplicated";
         return;
@@ -79,13 +79,13 @@ void GameClientMgr::createGameClient(const ServerConfig& config)
             return;
         }
         self->service_mgr_.onConnected(conn);
-        self->available_games_.emplace(config.name);
+        self->available_games_set_.emplace(config.name);
         DEBUG_LOG << "onConnected: " << config.name << " rmt_addr: " << conn->getRemoteAddr();
     };
     game_client->setConnectCallback(callback);
     game_client->setDisconnectCallback([self, config](TcpClientPtr conn)
     {
-        self->available_games_.erase(config.name);
+        self->available_games_set_.erase(config.name);
         self->service_mgr_.onDisconnected(conn);
         // TODO...tryConnect
     });
@@ -120,13 +120,13 @@ void GameClientMgr::stop()
 
 std::string GameClientMgr::getRandomGameName()
 {
-    if (available_games_.empty())
+    if (available_games_set_.empty())
     {
         return "";
     }
     std::random_device rd;
-    size_t idx = rd() % available_games_.size();
-    auto iter = available_games_.begin();
+    size_t idx = rd() % available_games_set_.size();
+    auto iter = available_games_set_.begin();
     std::advance(iter, idx);
     return *iter;
 }

@@ -33,9 +33,9 @@ GameService::~GameService()
 DEFINE_SERVICE_RPC(GameService, loginRequest, proto::LoginRequest)
 {
     auto device_info = request->device_info();
-    INFO_LOG << channel_->getRemoteAddr() << " deviceid: " << device_info.deviceid();
-    auto stub = getStub();
-    if (!stub)
+    INFO_LOG << channel_ptr_->getRemoteAddr() << " deviceid: " << device_info.deviceid();
+    auto stub_ptr = getStub();
+    if (!stub_ptr)
     {
         WARN_LOG << "getStub() is nullptr";
         return;
@@ -46,15 +46,15 @@ DEFINE_SERVICE_RPC(GameService, loginRequest, proto::LoginRequest)
     *reply_device = device_info;
     msg.set_retcode(0);
     msg.set_player_data("please serialize player data here");
-    stub->loginReply(nullptr, &msg, nullptr, nullptr);
+    stub_ptr->loginReply(nullptr, &msg, nullptr, nullptr);
 }
 
 DEFINE_SERVICE_RPC(GameService, callEntityRpc, proto::RpcMessage)
 {
-    INFO_LOG << channel_->getRemoteAddr() << " in call_entity_method " << request->id()
+    INFO_LOG << channel_ptr_->getRemoteAddr() << " in call_entity_method " << request->id()
              << " " << request->method() << " parameter: " << request->params();
-    auto stub = getStub();
-    if (!stub)
+    auto stub_ptr = getStub();
+    if (!stub_ptr)
     {
         WARN_LOG << "getStub() is nullptr";
         return;
@@ -65,7 +65,7 @@ DEFINE_SERVICE_RPC(GameService, callEntityRpc, proto::RpcMessage)
     msg.set_params(request->params());
     auto* device_info_ptr = msg.mutable_device_info();
     *device_info_ptr = request->device_info();
-    stub->callEntityRpc(nullptr, &msg, nullptr, nullptr);
+    stub_ptr->callEntityRpc(nullptr, &msg, nullptr, nullptr);
 }
 
 /* vim: set ts=4 sw=4 sts=4 tw=100 */

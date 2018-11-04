@@ -20,30 +20,30 @@
 #include "connection/connection.h"
 
 QueueServiceRequest::QueueServiceRequest(const pb::MethodDescriptor* method, pb::Message* request, IServicePtr service)
-    : method_(method), request_(request), service_(service)
+    : method_ptr_(method), request_ptr_(request), service_wptr_(service)
 {}
 
 QueueServiceRequest::QueueServiceRequest(const pb::MethodDescriptor* method, pb::Message* request, IServiceWptr service)
-    : method_(method), request_(request), service_(service)
+    : method_ptr_(method), request_ptr_(request), service_wptr_(service)
 {}
 
 QueueServiceRequest::~QueueServiceRequest()
 {
-    method_ = nullptr;
-    if (nullptr != request_)
+    method_ptr_ = nullptr;
+    if (nullptr != request_ptr_)
     {
-        delete request_;
-        request_ = nullptr;
+        delete request_ptr_;
+        request_ptr_ = nullptr;
     }
-    service_.reset();
+    service_wptr_.reset();
 }
 
 void QueueServiceRequest::call() const
 {
-    IServicePtr this_ptr = service_.lock();
-    if (this_ptr && method_ && request_)
+    IServicePtr this_ptr = service_wptr_.lock();
+    if (this_ptr && method_ptr_ && request_ptr_)
     {
-        this_ptr->dispatchMethod(method_, nullptr, request_, nullptr, nullptr);
+        this_ptr->dispatchMethod(method_ptr_, nullptr, request_ptr_, nullptr, nullptr);
     }
 }
 

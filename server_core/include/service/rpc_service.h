@@ -46,16 +46,16 @@ class IService: public std::enable_shared_from_this<IService>
 {
     public:
         IService() {}
-        virtual ~IService() {};
+        virtual ~IService() = default;
 
-        virtual void setChannel(RpcChannelPtr channel)
+        virtual void setChannel(RpcChannelPtr channel_ptr)
         {
-            if (!channel)
+            if (!channel_ptr)
             {
                 WARN_LOG << "channel is nullptr";
                 return;
             }
-            channel_ = channel;
+            channel_ptr_ = channel_ptr;
         }
 
         virtual const pb::ServiceDescriptor* getDescriptor() = 0;
@@ -75,7 +75,7 @@ class IService: public std::enable_shared_from_this<IService>
         virtual void onDisconnected() {};
 
     protected:
-        RpcChannelPtr       channel_;
+        RpcChannelPtr       channel_ptr_;
 };
 using IServicePtr = std::shared_ptr<IService>;
 using IServiceWptr = std::weak_ptr<IService>;
@@ -89,14 +89,14 @@ class RpcService: public IService,
         using StubPtr = std::shared_ptr<StubT>;
 
     public:
-        virtual void setChannel(RpcChannelPtr channel)
+        virtual void setChannel(RpcChannelPtr channel_ptr)
         {
-            if (!channel)
+            if (!channel_ptr)
             {
                 return;
             }
-            IService::setChannel(channel);
-            stub_ = std::make_shared<StubT>(channel.get());
+            IService::setChannel(channel_ptr);
+            stub_ptr_ = std::make_shared<StubT>(channel_ptr.get());
         }
 
         virtual const pb::ServiceDescriptor* getDescriptor()
@@ -122,11 +122,11 @@ class RpcService: public IService,
         // 使用Stub时肯定需要知道Stub的类型，这是业务相关的，不能在Service基类中
         StubPtr getStub()
         {
-            return stub_;
+            return stub_ptr_;
         }
 
     protected:
-        StubPtr   stub_;
+        StubPtr   stub_ptr_;
 };
 
 // 具体的工厂生成具体的业务service

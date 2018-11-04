@@ -54,15 +54,23 @@ DEFINE_SERVICE_RPC(ClientService, callEntityRpc, proto::RpcMessage)
 
 void ClientService::doTest()
 {
-    proto::RpcMessage msg;
-    msg.set_method(this->param);
-    msg.set_id(10001);
-    std::string params = this->param + "__" + std::to_string(test_num_);
-    msg.set_params(params);
-    getStub()->callEntityRpc(nullptr, &msg, nullptr, nullptr);
-    DEBUG_LOG << "test num: " << test_num_;
+    for (int i = 0; i < 1000; ++i)
+    {
+        proto::RpcMessage msg;
+        msg.set_method(this->param);
+        msg.set_id(10001);
+        std::string params = this->param + "__" + std::to_string(test_num_);
+        msg.set_params(params);
+        getStub()->callEntityRpc(nullptr, &msg, nullptr, nullptr);
+        DEBUG_LOG << "test num: " << test_num_;
+        ++test_num_;
+    }
 
-    ++test_num_;
+    ++timer_num;
+    if (timer_num > 28)
+    {
+        return;
+    }
     std::weak_ptr<ClientService> wptr = std::dynamic_pointer_cast<ClientService>(shared_from_this());
     TimerManagerInst::instance().addTimer(1, wptr, &ClientService::doTest);
 }

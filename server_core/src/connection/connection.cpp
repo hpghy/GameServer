@@ -20,9 +20,9 @@
 #include "server/server.h"
 #include "service/request_queue.h"
 
-Connection::Connection(boost::asio::io_service& io_service, std::weak_ptr<Server> server)
+Connection::Connection(boost::asio::io_service& io_service, std::weak_ptr<Server> server_wptr)
     : io_service_(io_service),
-      server_ptr_(server),
+      server_wptr_(server_wptr),
       rcv_strand_(std::make_shared<boost::asio::strand>(io_service)),
       snd_strand_(std::make_shared<boost::asio::strand>(io_service))
 {
@@ -30,7 +30,7 @@ Connection::Connection(boost::asio::io_service& io_service, std::weak_ptr<Server
 
 Connection::~Connection()
 {
-    channel_ptr_.reset();
+    channel_wptr_.reset();
 }
 
 void Connection::startWork()
@@ -63,11 +63,11 @@ void Connection::disconnect()
 // io线程中执行
 void Connection::doDisconnect()
 {
-    if (disconnected_)
+    if (is_disconnected_)
     {
         return;
     }
-    disconnected_ = true;
+    is_disconnected_ = true;
     closeSocket();
 }
 
@@ -91,22 +91,22 @@ bool Connection::closeSocket()
 
 void Connection::onConnected()
 {
-    ServerPtr server = getServer().lock();
-    if (!server)
+    ServerPtr server_ptr = getServer().lock();
+    if (!server_ptr)
     {
         WARN_LOG << "server_ptr_.lock is nullptr";
         return;
     }
-    server->onConnected(shared_from_this());
+    server_ptr->onConnected(shared_from_this());
 }
 
 void Connection::notifyDisconnected()
 {
     // 通知主线程执行回调
-    auto conn = shared_from_this();
-    auto callback = [conn](void)
+    auto conn_ptr = shared_from_this();
+    auto callback = [conn_ptr](void)
     {
-        conn->onDisconnected();
+        conn_ptr->onDisconnected();
     };
     QueueRequest* request = new QueueCallbackRequest(callback);
     RequestQueueInst::instance().pushRequest(request);
@@ -114,13 +114,13 @@ void Connection::notifyDisconnected()
 
 void Connection::onDisconnected()
 {
-    ServerPtr server = getServer().lock();
-    if (!server)
+    ServerPtr server_ptr = getServer().lock();
+    if (!server_ptr)
     {
         WARN_LOG << "server_ptr_.lock is nullptr";
         return;
     }
-    server->onDisconnected(shared_from_this());
+    server_ptr->onDisconnected(shared_from_this());
 }
 
 /* vim: set ts=4 sw=4 sts=4 tw=100 */

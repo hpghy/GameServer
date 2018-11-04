@@ -27,13 +27,13 @@ DEFINE_SERVICE_RPC(GameClientService, loginReply, proto::LoginReply)
 
     INFO_LOG << "loginReply deviceid: " << deviceid << " retcode: " << request->retcode();
 
-    auto stub = Global::gate_server->getClientStubByDeviceId(deviceid);
-    if (!stub)
+    auto stub_ptr = Global::gate_server->getClientStubByDeviceId(deviceid);
+    if (!stub_ptr)
     {
         WARN_LOG << "getClientStubByDeviceId: " << deviceid << " failed";
         return;
     }
-    stub->loginReply(nullptr, request, nullptr, nullptr);
+    stub_ptr->loginReply(nullptr, request, nullptr, nullptr);
 }
 
 DEFINE_SERVICE_RPC(GameClientService, callEntityRpc, proto::RpcMessage)
@@ -46,13 +46,13 @@ DEFINE_SERVICE_RPC(GameClientService, callEntityRpc, proto::RpcMessage)
         return;
     }
     const std::string& deviceid = request->device_info().deviceid();
-    auto stub = Global::gate_server->getClientStubByDeviceId(deviceid);
-    if (!stub)
+    auto stub_ptr = Global::gate_server->getClientStubByDeviceId(deviceid);
+    if (!stub_ptr)
     {
         WARN_LOG << "getRandomClientStub failed";
         return;
     }
-    stub->callEntityRpc(nullptr, request, nullptr, nullptr);
+    stub_ptr->callEntityRpc(nullptr, request, nullptr, nullptr);
 }
 
 IServicePtr GameClientServiceFactory::createService()

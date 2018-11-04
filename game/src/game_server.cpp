@@ -24,11 +24,11 @@ GameServer::GameServer(const GameConfig& game_config, const ServerConfig& self_c
     : MobileServer(make_shared<GameServiceFactory>()),
       config_(game_config),
       self_config_(self_config),
-      tcp_server_(make_shared<TcpServer>(getIoService()))
+      tcp_server_ptr_(make_shared<TcpServer>(getIoService()))
 {
     if (self_config_.http_port > 0)
     {
-        http_server_ = make_shared<HttpServer>(getIoService());
+        http_server_ptr_ = make_shared<HttpServer>(getIoService());
     }
     INFO_LOG << "Create GameServer";
 }
@@ -41,31 +41,31 @@ GameServer::~GameServer()
 void GameServer::startServer()
 {
     auto self = shared_from_this();
-    if (tcp_server_)
+    if (tcp_server_ptr_)
     {
-        tcp_server_->setMobileServer(self);
-        tcp_server_->bind(self_config_.host, self_config_.port);
-        tcp_server_->listen();
-        tcp_server_->start();
+        tcp_server_ptr_->setMobileServer(self);
+        tcp_server_ptr_->bind(self_config_.host, self_config_.port);
+        tcp_server_ptr_->listen();
+        tcp_server_ptr_->start();
     }
-    if (http_server_)
+    if (http_server_ptr_)
     {
-        http_server_->setMobileServer(self);
-        http_server_->bind(self_config_.http_host, self_config_.http_port);
-        http_server_->listen();
-        http_server_->start();
+        http_server_ptr_->setMobileServer(self);
+        http_server_ptr_->bind(self_config_.http_host, self_config_.http_port);
+        http_server_ptr_->listen();
+        http_server_ptr_->start();
     }
 }
 
 void GameServer::stopServer()
 {
-    if (tcp_server_)
+    if (tcp_server_ptr_)
     {
-        tcp_server_->stop();
+        tcp_server_ptr_->stop();
     }
-    if (http_server_)
+    if (http_server_ptr_)
     {
-        http_server_->stop();
+        http_server_ptr_->stop();
     }
 }
 

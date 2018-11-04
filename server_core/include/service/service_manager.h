@@ -23,17 +23,17 @@
 class ServiceManager
 {
     public:
-        ServiceManager(ServiceFactoryPtr factory) : factory_(factory)
+        ServiceManager(ServiceFactoryPtr factory_ptr) : factory_ptr_(factory_ptr)
         {}
 
-        void onConnected(ConnectionPtr conn);
-        void onDisconnected(ConnectionPtr conn);
-        IServicePtr getService(ConnectionPtr conn);
+        void onConnected(ConnectionPtr conn_ptr);
+        void onDisconnected(ConnectionPtr conn_ptr);
+        IServicePtr getService(ConnectionPtr conn_ptr);
         IServicePtr getService(const std::string& rmt_addr);
         IServicePtr getRandomService();
 
     private:
-        ServiceFactoryPtr factory_;
+        ServiceFactoryPtr factory_ptr_;
         std::unordered_map<std::string, IServicePtr> service_map_;
 };
 

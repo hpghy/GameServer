@@ -32,8 +32,8 @@ class MobileClient: public std::enable_shared_from_this<MobileClient>, private b
         void run();
         void poll();
 
-        void onConnected(ConnectionPtr conn, bool connected);
-        void onDisconnected(ConnectionPtr conn);
+        void onConnected(ConnectionPtr conn_ptr, bool connected);
+        void onDisconnected(ConnectionPtr conn_ptr);
 
         std::string param;
 
@@ -46,8 +46,8 @@ class MobileClient: public std::enable_shared_from_this<MobileClient>, private b
         uint16_t port_;
         bool is_running_ = false;
         bool is_shutdown_ = false;
-        std::shared_ptr<boost::asio::io_service::work> work_;
-        std::vector<std::thread> io_threads_;
+        std::shared_ptr<boost::asio::io_service::work> work_ptr_;
+        std::vector<std::thread> io_threads_vec_;
 
 #ifdef USE_KCP
         KcpClientPtr client_;

@@ -45,7 +45,7 @@ class GateServer: public MobileServer
         void stopServer() override;
         void onDisconnected(ConnectionPtr conn) override;
 
-        std::string getRandomGameName() { return game_client_mgr_->getRandomGameName(); }
+        std::string getRandomGameName() { return game_client_mgr_ptr_->getRandomGameName(); }
         GameStubPtr getGameStubByDeviceId(const std::string& deviceid);
         ClientStubPtr getClientStubByDeviceId(const std::string& deviceid);
 
@@ -57,14 +57,14 @@ class GateServer: public MobileServer
         ServerConfig self_config_;
 
         // 对client提供服务
-        TcpServerPtr tcp_server_;
-        KcpServerPtr kcp_server_;
-        HttpServerPtr http_server_;
+        TcpServerPtr tcp_server_ptr_;
+        KcpServerPtr kcp_server_ptr_;
+        HttpServerPtr http_server_ptr_;
 
-        GameClientMgrPtr game_client_mgr_;      // 连接所有的gameserver
+        GameClientMgrPtr game_client_mgr_ptr_;      // 连接所有的gameserver
 
         // 需要记录客户端和game_client的映射关系
-        std::unordered_map<std::string, DeviceClient> device_client_infos_;
+        std::unordered_map<std::string, DeviceClient> device_client_infos_map_;
 };
 
 #endif  // GATE_SERVER_H

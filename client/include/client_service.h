@@ -46,6 +46,7 @@ class ClientService: public BaseClass
 
     private:
         uint32_t test_num_ = 0;
+        uint32_t timer_num = 0;
         std::string param;
 };
 using ClientServicePtr = std::shared_ptr<ClientService>;

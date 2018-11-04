@@ -28,6 +28,7 @@
 
 /**
  * TODO...考虑做成单实例，但是io线程中不能访问
+ * 不太可能，因为有继承关系，所以单实例不靠谱
  **/
 class MobileServer: public std::enable_shared_from_this<MobileServer>,
     private boost::noncopyable
@@ -45,8 +46,8 @@ class MobileServer: public std::enable_shared_from_this<MobileServer>,
         virtual void poll();
 
         // 在主线程执行
-        virtual void onConnected(ConnectionPtr conn);
-        virtual void onDisconnected(ConnectionPtr conn);
+        virtual void onConnected(ConnectionPtr conn_ptr);
+        virtual void onDisconnected(ConnectionPtr conn_ptr);
 
         void onRecvShutdownSignal() { is_shutdown_ = true; }
         void onRecvReloadSignal() { is_reload_config_ = true;  }
@@ -66,8 +67,8 @@ class MobileServer: public std::enable_shared_from_this<MobileServer>,
         bool is_running_ = false;
         bool is_shutdown_ = false;
         bool is_reload_config_ = false;
-        std::shared_ptr<boost::asio::io_service::work> work_;
-        std::vector<std::thread> io_threads_;
+        std::shared_ptr<boost::asio::io_service::work> work_ptr_;
+        std::vector<std::thread> io_threads_vec_;
         ServiceManager service_mgr_;
 };
 

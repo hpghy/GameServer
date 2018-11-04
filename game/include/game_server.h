@@ -39,8 +39,8 @@ class GameServer: public MobileServer
     private:
         GameConfig config_;
         ServerConfig self_config_;
-        TcpServerPtr tcp_server_;
-        HttpServerPtr http_server_;
+        TcpServerPtr tcp_server_ptr_;
+        HttpServerPtr http_server_ptr_;
 };
 
 #endif  // GAME_SERVER_H

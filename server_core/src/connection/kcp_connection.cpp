@@ -26,8 +26,8 @@
 
 const std::string KcpConnection::heartbeat_str = "tick";
 
-KcpConnection::KcpConnection(boost::asio::io_service& io_service, std::weak_ptr<Server> server)
-    : Connection(io_service, server),
+KcpConnection::KcpConnection(boost::asio::io_service& io_service, std::weak_ptr<Server> server_wptr)
+    : Connection(io_service, server_wptr),
       socket_(io_service),
       kcp_(nullptr),
       kcp_timer_(io_service)

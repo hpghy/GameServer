@@ -46,13 +46,13 @@ DEFINE_SERVICE_RPC(GateService, loginRequest, proto::LoginRequest)
     const std::string& deviceid = request->device_info().deviceid();
     INFO_LOG << "in loginRequest deviceid: " << deviceid;
     setDeviceClient(request->device_info());
-    auto game_stub = Global::gate_server->getGameStubByDeviceId(deviceid);
-    if (!game_stub)
+    auto game_stub_ptr = Global::gate_server->getGameStubByDeviceId(deviceid);
+    if (!game_stub_ptr)
     {
         WARN_LOG << "getGameStub for deviceid: " << deviceid << " return nullptr";
         return;
     }
-    game_stub->loginRequest(nullptr, request, nullptr, nullptr);
+    game_stub_ptr->loginRequest(nullptr, request, nullptr, nullptr);
 }
 
 void GateService::setDeviceClient(const proto::DeviceInfo& device_info)
@@ -78,8 +78,8 @@ DEFINE_SERVICE_RPC(GateService, callEntityRpc, proto::RpcMessage)
         WARN_LOG << "gate_server is nullptr";
         return;
     }
-    auto game_stub = Global::gate_server->getGameStubByDeviceId(device_client_.deviceid);
-    if (!game_stub)
+    auto game_stub_ptr = Global::gate_server->getGameStubByDeviceId(device_client_.deviceid);
+    if (!game_stub_ptr)
     {
         WARN_LOG << "getRandomGameStub return null";
     }
@@ -96,7 +96,7 @@ DEFINE_SERVICE_RPC(GateService, callEntityRpc, proto::RpcMessage)
     device_info_ptr->set_addr(device_client_.addr);
     device_info_ptr->set_deviceid(device_client_.deviceid);
     device_info_ptr->set_sessionid(device_client_.session_id);
-    game_stub->callEntityRpc(nullptr, &msg, nullptr, nullptr);
+    game_stub_ptr->callEntityRpc(nullptr, &msg, nullptr, nullptr);
 }
 
 /* vim: set ts=4 sw=4 sts=4 tw=100 */

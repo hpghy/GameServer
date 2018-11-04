@@ -41,28 +41,28 @@ void Server::stop()
     stopped_ = true;
 }
 
-void Server::onConnected(ConnectionPtr conn)
+void Server::onConnected(ConnectionPtr conn_ptr)
 {
     DEBUG_LOG << "Server::onConnected";
-    auto mobile_server = mobile_server_.lock();
-    if (!mobile_server)
+    auto mobile_server_ptr = mobile_server_wptr_.lock();
+    if (!mobile_server_ptr)
     {
         ERROR_LOG << "mobile_server is null";
         return;
     }
-    mobile_server->onConnected(conn);
+    mobile_server_ptr->onConnected(conn_ptr);
 }
 
-void Server::onDisconnected(ConnectionPtr conn)
+void Server::onDisconnected(ConnectionPtr conn_ptr)
 {
     DEBUG_LOG << "Server::onDisconnected";
-    auto mobile_server = mobile_server_.lock();
-    if (!mobile_server)
+    auto mobile_server_ptr = mobile_server_wptr_.lock();
+    if (!mobile_server_ptr)
     {
         ERROR_LOG << "mobile_server is null";
         return;
     }
-    mobile_server->onDisconnected(conn);
+    mobile_server_ptr->onDisconnected(conn_ptr);
 }
 
 /* vim: set ts=4 sw=4 sts=4 tw=100 */

@@ -31,69 +31,70 @@ GateServer::GateServer(const GateConfig& gate_config, const ServerConfig& self_c
 {
     if (config_.kcp_enabled)
     {
-        kcp_server_ = make_shared<KcpServer>(getIoService());
+        kcp_server_ptr_ = make_shared<KcpServer>(getIoService());
     }
     if (self_config_.http_port > 0)
     {
-        http_server_ = make_shared<HttpServer>(getIoService());
+        http_server_ptr_ = make_shared<HttpServer>(getIoService());
     }
-    tcp_server_ = std::make_shared<TcpServer>(getIoService());
-    game_client_mgr_ = std::make_shared<GameClientMgr>(make_shared<GameClientServiceFactory>());
+    tcp_server_ptr_ = std::make_shared<TcpServer>(getIoService());
+    game_client_mgr_ptr_ = std::make_shared<GameClientMgr>(make_shared<GameClientServiceFactory>());
     INFO_LOG << "Create GateServer: " << self_config_.name << " Succ!";
 }
 
 void GateServer::startServer()
 {
     auto self = shared_from_this();
-    if (tcp_server_)
+    if (tcp_server_ptr_)
     {
-        tcp_server_->setMobileServer(self);
-        tcp_server_->bind(self_config_.host, self_config_.port);
-        tcp_server_->listen();
-        tcp_server_->start();
+        // TODO...抽取一个init函数
+        tcp_server_ptr_->setMobileServer(self);
+        tcp_server_ptr_->bind(self_config_.host, self_config_.port);
+        tcp_server_ptr_->listen();
+        tcp_server_ptr_->start();
     }
-    if (kcp_server_)
+    if (kcp_server_ptr_)
     {
-        kcp_server_->setMobileServer(self);
-        kcp_server_->bind(self_config_.host, self_config_.port);
-        kcp_server_->listen();
-        kcp_server_->start();
+        kcp_server_ptr_->setMobileServer(self);
+        kcp_server_ptr_->bind(self_config_.host, self_config_.port);
+        kcp_server_ptr_->listen();
+        kcp_server_ptr_->start();
     }
-    if (http_server_)
+    if (http_server_ptr_)
     {
-        http_server_->setMobileServer(self);
-        http_server_->bind(self_config_.http_host, self_config_.http_port);
-        http_server_->listen();
-        http_server_->start();
+        http_server_ptr_->setMobileServer(self);
+        http_server_ptr_->bind(self_config_.http_host, self_config_.http_port);
+        http_server_ptr_->listen();
+        http_server_ptr_->start();
     }
 
     for (const auto& pair : config_.server_configs)
     {
         if (0 == pair.first.find("game"))
         {
-            game_client_mgr_->addGameConfig(pair.second);
+            game_client_mgr_ptr_->addGameConfig(pair.second);
         }
     }
-    game_client_mgr_->setMobileServer(shared_from_this());
-    game_client_mgr_->start();
+    game_client_mgr_ptr_->setMobileServer(shared_from_this());
+    game_client_mgr_ptr_->start();
 }
 
 void GateServer::stopServer()
 {
-    if (tcp_server_)
+    if (tcp_server_ptr_)
     {
-        tcp_server_->stop();
+        tcp_server_ptr_->stop();
     }
-    if (tcp_server_)
+    if (tcp_server_ptr_)
     {
-        tcp_server_->stop();
+        tcp_server_ptr_->stop();
     }
-    if (http_server_)
+    if (http_server_ptr_)
     {
-        http_server_->stop();
+        http_server_ptr_->stop();
     }
 
-    game_client_mgr_->stop();
+    game_client_mgr_ptr_->stop();
 }
 
 void GateServer::onDisconnected(ConnectionPtr conn)
@@ -130,19 +131,19 @@ void GateServer::onDisconnected(ConnectionPtr conn)
 
 GateServer::GameStubPtr GateServer::getGameStubByDeviceId(const std::string& deviceid)
 {
-    auto iter = device_client_infos_.find(deviceid);
-    if (iter == device_client_infos_.end())
+    auto iter = device_client_infos_map_.find(deviceid);
+    if (iter == device_client_infos_map_.end())
     {
         WARN_LOG << "find DeviceInfo deviceid: " << deviceid << " failed";
         return GameStubPtr();
     }
-    return game_client_mgr_->getGameStub(iter->second.game_name);
+    return game_client_mgr_ptr_->getGameStub(iter->second.game_name);
 }
 
 GateServer::ClientStubPtr GateServer::getClientStubByDeviceId(const std::string& deviceid)
 {
-    auto iter = device_client_infos_.find(deviceid);
-    if (iter == device_client_infos_.end())
+    auto iter = device_client_infos_map_.find(deviceid);
+    if (iter == device_client_infos_map_.end())
     {
         WARN_LOG << "find DeviceInfo deviceid: " << deviceid << " failed";
         return ClientStubPtr();
@@ -171,17 +172,17 @@ void GateServer::addDeviceClient(const DeviceClient& device_client)
         WARN_LOG << "deviceid: " << device_client.deviceid << " game_name is empty";
         return;
     }
-    auto iter = device_client_infos_.find(device_client.deviceid);
-    if (iter != device_client_infos_.end())
+    auto iter = device_client_infos_map_.find(device_client.deviceid);
+    if (iter != device_client_infos_map_.end())
     {
         WARN_LOG << "duplicate deviceid: " << device_client.deviceid << " and overwrite it";
     }
-    device_client_infos_[device_client.deviceid] = device_client;
+    device_client_infos_map_[device_client.deviceid] = device_client;
 }
 
 void GateServer::delDeviceClient(const std::string& deviceid)
 {
-    device_client_infos_.erase(deviceid);
+    device_client_infos_map_.erase(deviceid);
 }
 
 IServicePtr GateServiceFactory::createService()

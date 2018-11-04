@@ -1,18 +1,18 @@
 /***************************************************************************
- * 
+ *
  * Copyright (c) 2018 hpghy, Inc. All Rights Reserved
- * $Id$ 
- * 
+ * $Id$
+ *
  **************************************************************************/
- 
- /**
- * @file http_request.cpp
- * @author hpghy(790042744@qq.com)
- * @date 2018/07/29 21:22:29
- * @version $Revision$ 
- * @brief 
- *  
- **/
+
+/**
+* @file http_request.cpp
+* @author hpghy(790042744@qq.com)
+* @date 2018/07/29 21:22:29
+* @version $Revision$
+* @brief
+*
+**/
 
 #include <boost/lexical_cast.hpp>
 #include "http/http_request.h"
@@ -33,7 +33,7 @@ bool HttpRequest::parseLine()
     {
         pos = uri.length();
     }
-    else if (!parseArgs(uri, pos+1))
+    else if (!parseArgs(uri, pos + 1))
     {
         return false;
     }
@@ -83,8 +83,7 @@ void HttpRequest::parseOneArg(const std::string& args, uint32_t key_begin, uint3
 {
     if (key_begin < key_end && key_end < value_begin && value_begin < value_end)
     {
-        args_map.insert(std::make_pair(std::string(args, key_begin, key_end),
-                                       std::string(args, value_begin, value_end)));
+        args_map.emplace(std::string(args, key_begin, key_end), std::string(args, value_begin, value_end));
     }
 }
 

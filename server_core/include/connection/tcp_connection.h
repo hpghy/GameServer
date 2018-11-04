@@ -29,7 +29,7 @@ class TcpConnection: public Connection
         using SendingBufferSequence = std::vector<std::shared_ptr<std::string>>;
 
     public:
-        TcpConnection(boost::asio::io_service& io_service, std::weak_ptr<Server> server);
+        TcpConnection(boost::asio::io_service& io_service, std::weak_ptr<Server> server_wptr);
         ~TcpConnection();
         tcp_space::socket& socket() { return socket_; }
 
@@ -53,7 +53,7 @@ class TcpConnection: public Connection
     private:
         tcp_space::socket 		socket_;
         std::vector<char>		recv_buffer_;
-        bool 		sending_ = false;
+        bool 		is_sending_ = false;
         SendingBufferSequence   data_queue_;			// 缓存待发送的数据
         SendingBufferSequence   sending_queue_;			// 缓存正在异步写的数据, 需要保证异步写时数据还存在
         std::size_t             sending_size_ = 0;      // 异步发送数据大小

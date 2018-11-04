@@ -39,7 +39,7 @@ using ServiceFactoryPtr = std::shared_ptr<ServiceFactory>;
 class QueueRequest
 {
     public:
-        virtual ~QueueRequest() {}
+        virtual ~QueueRequest() = default;
         virtual void call() const = 0;
 };
 
@@ -52,9 +52,9 @@ class QueueServiceRequest: public QueueRequest
         virtual void call() const;
 
     private:
-        const pb::MethodDescriptor* method_;
-        pb::Message* request_;
-        IServiceWptr service_;
+        const pb::MethodDescriptor* method_ptr_;
+        pb::Message* request_ptr_;
+        IServiceWptr service_wptr_;
 };
 
 class QueueCallbackRequest: public QueueRequest
@@ -89,18 +89,14 @@ class QueueSocketRequest: public QueueRequest
         typedef void(T::*F)();
 
     public:
-        QueueSocketRequest(std::weak_ptr<T> self, F f)
-            : self_(self), f_(f)
+        QueueSocketRequest(std::weak_ptr<T> self_wptr, F f)
+            : self_wptr_(self_wptr), f_(f)
         {}
+        virtual ~QueueSocketRequest() = default;
 
-        virtual ~QueueSocketRequest()
-        {
-            self_.reset();
-            f_ = nullptr;
-        }
         virtual void call() const
         {
-            std::shared_ptr<T> this_ptr = self_.lock();
+            std::shared_ptr<T> this_ptr = self_wptr_.lock();
             if (nullptr != this_ptr && nullptr != f_)
             {
                 ((this_ptr.get())->*f_)();
@@ -108,7 +104,7 @@ class QueueSocketRequest: public QueueRequest
         }
 
     private:
-        std::weak_ptr<T> self_;
+        std::weak_ptr<T> self_wptr_;
         F f_;
 };
 

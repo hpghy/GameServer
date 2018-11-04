@@ -19,54 +19,54 @@
 #include <random>
 #include "connection/rpc_channel.h"
 
-void ServiceManager::onConnected(ConnectionPtr conn)
+void ServiceManager::onConnected(ConnectionPtr conn_ptr)
 {
-    if (!conn)
+    if (!conn_ptr)
     {
         return;
     }
-    if (!factory_)
+    if (!factory_ptr_)
     {
         ERROR_LOG << "factory_ is nullptr";
         return;
     }
-    const std::string& rmt_addr = conn->getRemoteAddr();
+    const std::string& rmt_addr = conn_ptr->getRemoteAddr();
     auto iter = service_map_.find(rmt_addr);
     if (iter != service_map_.end())
     {
         ERROR_LOG << "rmt_addr " << rmt_addr << " is still exist!!!";
         return;
     }
-    auto channel = std::make_shared<RpcChannel>(conn);
-    auto service = factory_->createService();
-    service->setChannel(channel);
-    service_map_.insert(std::make_pair(rmt_addr, service));
-    channel->setService(service);
-    conn->setChannel(channel);
+    auto channel_ptr = std::make_shared<RpcChannel>(conn_ptr);
+    auto service_ptr = factory_ptr_->createService();
+    service_ptr->setChannel(channel_ptr);
+    service_map_.emplace(rmt_addr, service_ptr);
+    channel_ptr->setService(service_ptr);
+    conn_ptr->setChannel(channel_ptr);
 
     INFO_LOG << "ServiceManager add " << rmt_addr;
 }
 
-void ServiceManager::onDisconnected(ConnectionPtr conn)
+void ServiceManager::onDisconnected(ConnectionPtr conn_ptr)
 {
-    if (!conn)
+    if (!conn_ptr)
     {
         DEBUG_LOG << "onDisconnected conn is nullptr";
         return;
     }
-    const std::string& rmt_addr = conn->getRemoteAddr();
+    const std::string& rmt_addr = conn_ptr->getRemoteAddr();
     service_map_.erase(rmt_addr);
 
     INFO_LOG << "ServiceManager erase " << rmt_addr;
 }
 
-IServicePtr ServiceManager::getService(ConnectionPtr conn)
+IServicePtr ServiceManager::getService(ConnectionPtr conn_ptr)
 {
-    if (!conn)
+    if (!conn_ptr)
     {
         return IServicePtr();
     }
-    return getService(conn->getRemoteAddr());
+    return getService(conn_ptr->getRemoteAddr());
 }
 
 IServicePtr ServiceManager::getService(const std::string& rmt_addr)

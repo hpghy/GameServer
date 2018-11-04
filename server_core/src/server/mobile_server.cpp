@@ -39,11 +39,11 @@ bool MobileServer::start()
     startServer();
     initBeforeStartThread();
 
-    work_ = std::make_shared<boost::asio::io_service::work>(io_service_);
+    work_ptr_ = std::make_shared<boost::asio::io_service::work>(io_service_);
     auto self(shared_from_this());
     for (uint32_t idx = 0; idx < io_thread_num; ++ idx)
     {
-        io_threads_.emplace_back([self]()
+        io_threads_vec_.emplace_back([self]()
         {
             self->io_service_.run();
         });
@@ -78,13 +78,13 @@ void MobileServer::run()
     }
 
     // 使得io线程函数正常结束
-    work_.reset();
+    work_ptr_.reset();
     io_service_.stop();
 
     INFO_LOG << "wait children thread exit";
-    for (size_t idx = 0; idx < io_threads_.size(); ++idx)
+    for (auto& thread : io_threads_vec_)
     {
-        io_threads_[idx].join();
+        thread.join();
     }
 
     INFO_LOG << "all children thread exit";
@@ -127,15 +127,15 @@ void MobileServer::poll()
     }
 }
 
-void MobileServer::onConnected(ConnectionPtr conn)
+void MobileServer::onConnected(ConnectionPtr conn_ptr)
 {
     DEBUG_LOG << "MobileServer::onConnected";
-    service_mgr_.onConnected(conn);
+    service_mgr_.onConnected(conn_ptr);
 }
 
-void MobileServer::onDisconnected(ConnectionPtr conn)
+void MobileServer::onDisconnected(ConnectionPtr conn_ptr)
 {
-    service_mgr_.onDisconnected(conn);
+    service_mgr_.onDisconnected(conn_ptr);
 }
 
 void MobileServer::onReloadConfig()

@@ -27,6 +27,9 @@
 class KcpServer: public Server
 {
     public:
+        using KcpConnWptr = std::weak_ptr<KcpConnection>;
+
+    public:
         explicit KcpServer(boost::asio::io_service&);
         ~KcpServer();
 
@@ -34,8 +37,6 @@ class KcpServer: public Server
         void listen();
         void start();
         void stop();
-
-        using KcpConnWptr = std::weak_ptr<KcpConnection>;
 
     private:
         void asyncReceive();

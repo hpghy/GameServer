@@ -28,7 +28,7 @@ inline int kcp_sync_output(const char* buf, int len, ikcpcb* kcp, void* user);
 class KcpConnection: public Connection
 {
     public:
-        KcpConnection(boost::asio::io_service& io_server, std::weak_ptr<Server> server);
+        KcpConnection(boost::asio::io_service& io_server, std::weak_ptr<Server> server_wptr);
         ~KcpConnection();
 
         void bindConnect(const udp_addr&, const udp_addr&);

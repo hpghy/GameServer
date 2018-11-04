@@ -51,7 +51,7 @@ class GameClientMgr : public std::enable_shared_from_this<GameClientMgr>
         MobileServerPtr container_;
         std::unordered_map<std::string, TcpClientPtr> client_map_;
         std::unordered_map<std::string, ServerConfig> game_config_map_;
-        std::unordered_set<std::string> available_games_;
+        std::unordered_set<std::string> available_games_set_;
         ServiceManager service_mgr_;
         bool is_running_ = false;
 };
