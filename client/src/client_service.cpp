@@ -11,9 +11,7 @@
 * @date 2018/07/15 17:44:41
 * @version $Revision$
 * @brief
-*
-**/
-
+* **/
 #include "client_service.h"
 
 #include "util/util.h"

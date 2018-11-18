@@ -63,11 +63,9 @@ void TcpConnection::setOption()
 
 void TcpConnection::asyncReceive()
 {
-    socket_.async_receive(boost::asio::buffer(recv_buffer_),
-                          getRecvStrand()->wrap(std::bind(&TcpConnection::handleReceive,
-                                  std::static_pointer_cast<TcpConnection>(shared_from_this()),
-                                  std::placeholders::_1,
-                                  std::placeholders::_2)));
+    auto self = std::dynamic_pointer_cast<TcpConnection>(shared_from_this());
+    auto handle = [self](const boost_err & ec, std::size_t length) { self->handleReceive(ec, length); };
+    socket_.async_receive(boost::asio::buffer(recv_buffer_), getRecvStrand()->wrap(handle));
 }
 
 // io线程中使用recv_strand保护
@@ -149,9 +147,9 @@ void TcpConnection::startAsyncSend()
                              std::placeholders::_1, std::placeholders::_2));
     */
     // 注意和socket::async_send的区别
-    boost::asio::async_write(socket_, buffers, getSendStrand()->wrap(std::bind(&TcpConnection::handleAsyncWrite,
-                             std::static_pointer_cast<TcpConnection>(shared_from_this()),
-                             std::placeholders::_1, std::placeholders::_2)));
+    auto self = std::dynamic_pointer_cast<TcpConnection>(shared_from_this());
+    auto handle = [self](const boost_err & ec, std::size_t bytes) { self->handleAsyncWrite(ec, bytes); };
+    boost::asio::async_write(socket_, buffers, getSendStrand()->wrap(handle));
 }
 
 // io线程中执行

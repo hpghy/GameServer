@@ -61,7 +61,7 @@ class Connection: private boost::noncopyable, public std::enable_shared_from_thi
         bool closeSocket();
 
         // 主线程执行
-        void disconnect();
+        virtual void disconnect();
         // io线程执行
         void doDisconnect();
 
@@ -89,6 +89,7 @@ class Connection: private boost::noncopyable, public std::enable_shared_from_thi
 
         // io线程中执行
         virtual void doAsyncSendData(std::shared_ptr<std::string>) = 0;
+        virtual void dispatchCloseSocket();
         virtual void handleCloseSocket() = 0;
 
     protected:

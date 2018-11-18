@@ -1,7 +1,7 @@
 {
     "common":
     {
-        "kcp_enabled": false,
+        "kcp_enabled": true,
         "compress_enabled": false,
         "encryption_enabled": false
     },

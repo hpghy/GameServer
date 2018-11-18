@@ -38,7 +38,7 @@ MobileClient::MobileClient(boost::asio::io_service& io_service,
       ip_(ip),
       port_(port)
 {
-    client_ = std::make_shared<ClientType>(io_service, ip, port);
+    client_ptr_ = std::make_shared<ClientType>(io_service, ip, port);
     service_ = std::make_shared<ClientService>();
     INFO_LOG << "Create MobileClient";
 }
@@ -57,14 +57,14 @@ bool MobileClient::start()
     is_running_ = true;
 
     // 客户端不处理信号
-    client_->setConnectCallback(bind(&MobileClient::onConnected,
-                                     std::static_pointer_cast<MobileClient>(shared_from_this()),
-                                     std::placeholders::_1,
-                                     std::placeholders::_2));
-    client_->setDisconnectCallback(bind(&MobileClient::onDisconnected,
-                                        std::static_pointer_cast<MobileClient>(shared_from_this()),
-                                        std::placeholders::_1));
-    client_->asyncConnect();
+    client_ptr_->setConnectCallback(bind(&MobileClient::onConnected,
+                                         std::static_pointer_cast<MobileClient>(shared_from_this()),
+                                         std::placeholders::_1,
+                                         std::placeholders::_2));
+    client_ptr_->setDisconnectCallback(bind(&MobileClient::onDisconnected,
+                                            std::static_pointer_cast<MobileClient>(shared_from_this()),
+                                            std::placeholders::_1));
+    client_ptr_->asyncConnect();
 
     work_ptr_ = std::make_shared<boost::asio::io_service::work>(io_service_);
     auto self(shared_from_this());
@@ -134,11 +134,11 @@ void MobileClient::onConnected(ConnectionPtr conn, bool connected)
     }
 
     // 构造conn <--> channel <--> service 关系
-    auto channel = client_->getChannel().lock();
+    auto channel = client_ptr_->getChannel().lock();
     if (!channel)
     {
-        channel = std::make_shared<RpcChannel>(client_);
-        client_->setChannel(channel);
+        channel = std::make_shared<RpcChannel>(client_ptr_);
+        client_ptr_->setChannel(channel);
 
         service_->setChannel(channel);
         service_->setParam(this->param);
@@ -160,6 +160,7 @@ void MobileClient::onConnected(ConnectionPtr conn, bool connected)
         auto* device_info = msg.mutable_device_info();
         device_info->set_deviceid(deviceid);
         service_->getStub()->loginRequest(nullptr, &msg, nullptr, nullptr);
+        DEBUG_LOG << "HPTEST loginRequest over";
     }
 }
 

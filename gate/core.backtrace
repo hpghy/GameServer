@@ -1,0 +1,11 @@
+0   gateserver                          0x0000000101310923 _Z9backTracev + 35
+1   gateserver                          0x00000001012678c4 _Z10sig_handlei + 68
+2   libsystem_platform.dylib            0x00007fff6cde0f5a _sigtramp + 26
+3   ???                                 0x00007faef8f01173 0x0 + 140389477519731
+4   gateserver                          0x00000001012847e9 _ZN9TcpClient12asyncConnectEv + 1577
+5   gateserver                          0x000000010120b69a _ZN13GameClientMgr16createGameClientERK12ServerConfig + 9322
+6   gateserver                          0x000000010120bf51 _ZN13GameClientMgr5startEv + 1425
+7   gateserver                          0x00000001012506cd _ZN10GateServer11startServerEv + 3613
+8   gateserver                          0x00000001012cd4da _ZN12MobileServer5startEv + 90
+9   gateserver                          0x00000001012685a3 main + 2851
+10  libdyld.dylib                       0x00007fff6cb5f115 start + 1

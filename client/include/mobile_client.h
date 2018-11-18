@@ -15,6 +15,7 @@
 #include <boost/noncopyable.hpp>
 #include "util/util.h"
 #include "connection/tcp_client.h"
+#include "connection/kcp_client.h"
 #include "client_service.h"
 
 // 和GateServer相对应, 考虑继承MobileServer
@@ -50,14 +51,13 @@ class MobileClient: public std::enable_shared_from_this<MobileClient>, private b
         std::vector<std::thread> io_threads_vec_;
 
 #ifdef USE_KCP
-        KcpClientPtr client_;
+        KcpClientPtr client_ptr_;
         using ClientType = KcpClient;
 #else
-        TcpClientPtr client_;
+        TcpClientPtr client_ptr_;
         using ClientType = TcpClient;
 #endif
         ClientServicePtr service_;
-
 };
 
 #endif  // MOBILE_CLIENT_H

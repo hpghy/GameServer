@@ -36,7 +36,8 @@ Connection::~Connection()
 void Connection::startWork()
 {
     // startWork必定是在主线程调用的
-    rcv_strand_->post(std::bind(&Connection::doStartWork, std::static_pointer_cast<Connection>(shared_from_this())));
+    auto self = shared_from_this();
+    rcv_strand_->post([self]() { self->doStartWork(); });
 }
 
 int32_t Connection::asyncSend(std::shared_ptr<std::string> data)
@@ -46,9 +47,8 @@ int32_t Connection::asyncSend(std::shared_ptr<std::string> data)
         WARN_LOG << "socket has been closed";
         return -1;
     }
-    snd_strand_->post(std::bind(&Connection::doAsyncSendData,
-                                std::static_pointer_cast<Connection>(shared_from_this()),
-                                data));
+    auto self = shared_from_this();
+    snd_strand_->post([self, data]() { self->doAsyncSendData(data); });
     return 0;
 }
 
@@ -56,8 +56,8 @@ int32_t Connection::asyncSend(std::shared_ptr<std::string> data)
 void Connection::disconnect()
 {
     //这里没有必要像close_socket一样使用automic_flag控制
-    snd_strand_->post(std::bind(&Connection::doDisconnect,
-                                std::static_pointer_cast<Connection>(shared_from_this())));
+    auto self = shared_from_this();
+    snd_strand_->post([self]() { self->doDisconnect();  });
 }
 
 // io线程中执行
@@ -82,11 +82,17 @@ bool Connection::closeSocket()
                                         std::memory_order_relaxed))
     {
         onDisconnected();
-        snd_strand_->post(std::bind(&Connection::handleCloseSocket,
-                                    std::static_pointer_cast<Connection>(shared_from_this())));
+        // 需要保证在IO线程执行handleCloseSocket
+        dispatchCloseSocket();
         return true;
     }
     return false;
+}
+
+void Connection::dispatchCloseSocket()
+{
+    auto self = shared_from_this();
+    snd_strand_->post([self]() { self->handleCloseSocket(); });
 }
 
 void Connection::onConnected()

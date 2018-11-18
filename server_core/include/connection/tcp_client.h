@@ -22,7 +22,7 @@
 #include "connection/tcp_connection.h"
 #include "util/timer_manager.h"
 
-// TODO...考虑上层再封装一层，工作在主线程
+// TODO...考虑上层再封装一层，工作在主线程, 并且把重连也挪到上层
 class TcpClient: public TcpConnection
 {
     public:
@@ -32,9 +32,8 @@ class TcpClient: public TcpConnection
             STATUS_CONNECTING = 1,
             STATUS_CONNECTED = 2,
         };
-        using TcpClientPtr = std::shared_ptr<TcpClient>;
-
         const static uint32_t reconnect_max_interval;
+        using TcpClientPtr = std::shared_ptr<TcpClient>;
 
     public:
         TcpClient(boost::asio::io_service&, const std::string&, uint32_t);

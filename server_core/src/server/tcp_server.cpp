@@ -81,6 +81,7 @@ void TcpServer::setOption()
     {
         ERROR_LOG << "non_blocking failed: " << ec.message();
     }
+    // TODO...设置发送和接受缓存大小
 }
 
 void TcpServer::listen()
@@ -100,6 +101,7 @@ void TcpServer::asyncReceive()
 {
     // 这里没有必要使用strand因为io_service只会存在一个handler
     conn_ptr_ = std::make_shared<TcpConnection>(getIoService(), shared_from_this());
+    // accept时新产生的socket会继承监听socket的缓冲区大小
     acceptor_.async_accept(conn_ptr_->socket(), std::bind(&TcpServer::handleAccept,
                            std::static_pointer_cast<TcpServer>(shared_from_this()),
                            std::placeholders::_1));

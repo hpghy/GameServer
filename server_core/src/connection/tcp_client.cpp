@@ -39,8 +39,10 @@ TcpClient::TcpClient(boost::asio::io_service& io_service, const std::string& ip,
 void TcpClient::asyncConnect()
 {
     DEBUG_LOG << "asyncConnect....";
-    getSendStrand()->post(std::bind(&TcpClient::doAsyncConnect,
-                                    std::static_pointer_cast<TcpClient>(shared_from_this())));
+    auto self = std::dynamic_pointer_cast<TcpClient>(shared_from_this());
+    getSendStrand()->post([self]() { self->doAsyncConnect(); });
+    //getSendStrand()->post(std::bind(&TcpClient::doAsyncConnect,
+    //                                std::static_pointer_cast<TcpClient>(shared_from_this())));
 }
 
 // io线程执行
@@ -56,9 +58,8 @@ void TcpClient::doAsyncConnect()
         return;
     }
     status_ = Status::STATUS_CONNECTING;
-    getSocket().async_connect(remote_addr_, getSendStrand()->wrap(std::bind(&TcpClient::handleConnect,
-                              std::static_pointer_cast<TcpClient>(shared_from_this()),
-                              std::placeholders::_1)));
+    auto self = std::dynamic_pointer_cast<TcpClient>(shared_from_this());
+    getSocket().async_connect(remote_addr_, getSendStrand()->wrap([self](const boost_err & ec) { self->handleConnect(ec); }));
 }
 
 // io线程里面执行
@@ -75,9 +76,8 @@ void TcpClient::handleConnect(const boost_err& ec)
     status_ = Status::STATUS_DISCONNECTED;
 
     reconnect_timer_.expires_from_now(boost::posix_time::seconds(reconnect_interval_));
-    reconnect_timer_.async_wait(getSendStrand()->wrap(std::bind(&TcpClient::reconnectTimer,
-                                std::static_pointer_cast<TcpClient>(shared_from_this()),
-                                std::placeholders::_1)));
+    auto self = std::dynamic_pointer_cast<TcpClient>(shared_from_this());
+    reconnect_timer_.async_wait(getSendStrand()->wrap([self](const boost_err & ec) { self->reconnectTimer(ec); }));
     reconnect_interval_ = std::min(reconnect_max_interval, reconnect_interval_ * 2);
 }
 
@@ -97,15 +97,14 @@ void TcpClient::reconnectTimer(const boost::system::error_code& ec)
     {
         WARN_LOG << "close error: " << error.message();
     }
-    getSocket().async_connect(remote_addr_, getSendStrand()->wrap(std::bind(&TcpClient::handleConnect,
-                              std::static_pointer_cast<TcpClient>(shared_from_this()),
-                              std::placeholders::_1)));
+    auto self = std::dynamic_pointer_cast<TcpClient>(shared_from_this());
+    getSocket().async_connect(remote_addr_, getSendStrand()->wrap([self](const boost_err & ec) { self->handleConnect(ec); }));
 }
 
 void TcpClient::onConnected()
 {
     bool connected = (Status::STATUS_CONNECTED == status_);
-    INFO_LOG << "onConnected " << connected;
+    INFO_LOG << "TcpClient onConnected " << connected;
     auto self = std::static_pointer_cast<TcpClient>(shared_from_this());
     auto callback = [self, connected](void)
     {
@@ -115,11 +114,11 @@ void TcpClient::onConnected()
             ERROR_LOG << "No connect_cb";
             return;
         }
-        self->connect_cb_(self, connected);
         if (connected)
         {
             self->startWork();
         }
+        self->connect_cb_(self, connected);
     };
     QueueRequest* request = new QueueCallbackRequest(callback);
     RequestQueueInst::instance().pushRequest(request);

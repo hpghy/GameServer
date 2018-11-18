@@ -19,8 +19,9 @@
 #include "mobile_client.h"
 #include "util/util.h"
 
-void sig_handle(int)
+void sig_handle(int signal)
 {
+    std::cerr << "sig_handle signal: " << signal;
     backTrace();
 }
 
@@ -44,7 +45,7 @@ int main(int argc, char* argv[])
 {
     if (4 != argc)
     {
-        ERROR_LOG << "client ip port\n";
+        ERROR_LOG << "usage: client ip port client_flag";
         return 0;
     }
     std::string ip = argv[1];

@@ -57,7 +57,7 @@ DEFINE_SERVICE_RPC(GateService, loginRequest, proto::LoginRequest)
 
 void GateService::setDeviceClient(const proto::DeviceInfo& device_info)
 {
-    device_client_.addr = channel_->getRemoteAddr();
+    device_client_.addr = channel_ptr_->getRemoteAddr();
     device_client_.deviceid = device_info.deviceid();
     device_client_.session_id = 0;
     device_client_.game_name = Global::gate_server->getRandomGameName();
@@ -71,7 +71,7 @@ void GateService::setDeviceClient(const proto::DeviceInfo& device_info)
 
 DEFINE_SERVICE_RPC(GateService, callEntityRpc, proto::RpcMessage)
 {
-    INFO_LOG << channel_->getRemoteAddr() << " in call_entity_method " << request->id()
+    INFO_LOG << channel_ptr_->getRemoteAddr() << " in call_entity_method " << request->id()
              << " " << request->method() << " " << request->params();
     if (!Global::gate_server)
     {

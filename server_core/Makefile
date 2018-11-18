@@ -18,14 +18,16 @@ BUILD_OBJ = $(subst ./src/,./build/,$(BUILD_TMP2_OBJ))
 BUILD_DEP = $(BUILD_OBJ:.o=.d)
 
 C_OPTION := -std=c++11 -Wall -g -D BOOST_LOG_DYN_LINK \
-			-I/usr/local/boost/include/ -I/usr/local/include
+			-I/usr/local/boost/include/ -I/usr/local/include \
+			-fsanitize=address
 C_OPTION += $(addprefix -I,$(INCDIR))
 
 L_OPTION := -std=c++11 -Wall -g -D BOOST_LOG_DYN_LINK \
 			-I/usr/local/include \
 			-L/usr/local/boost/lib/ -L/usr/local/lib \
 			-lboost_log_setup -lboost_log -lboost_filesystem -lboost_thread -lboost_system -pthread \
-			-lprotobuf -g -rdynamic -D BOOST_LOG_DYN_LINK
+			-lprotobuf -g -rdynamic -D BOOST_LOG_DYN_LINK \
+			-fsanitize=address
 L_OPTION += $(addprefix -I,$(INCDIR))
 L_OPTION += $(addprefix -L,$(LIBPATH))
 L_OPTION += $(addprefix -l,$(LIBNAME))

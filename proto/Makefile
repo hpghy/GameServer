@@ -20,7 +20,7 @@ all: proto $(OBJ_FILES)
 	ar rcs $(TARGET) $(OBJ_FILES)
 	mv $(TARGET) $(LIB_DIR)
 
-C_OPTION := -std=c++11 -Wall -g -I$(INC_DIR) -I/usr/local/include
+C_OPTION := -std=c++11 -Wall -g -I$(INC_DIR) -I/usr/local/include -fsanitize=address
 $(BUILD_DIR)/%.o: %.cc
 	$(shell test -d $(dir $@) || mkdir -p $(dir $@))
 	g++ -c $< $(C_OPTION) -o $@
