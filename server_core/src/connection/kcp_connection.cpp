@@ -182,8 +182,8 @@ void KcpConnection::handleReceive(const boost_err& ec, std::size_t bytes)
         return;
     }
 
-    auto channel = getChannel().lock();
-    if (!channel)
+    auto channel_ptr = getChannel();
+    if (!channel_ptr)
     {
         ERROR_LOG << "tcp_connection channel_ptr is null\n";
         closeSocket();
@@ -191,7 +191,7 @@ void KcpConnection::handleReceive(const boost_err& ec, std::size_t bytes)
     }
     while ((ret = ikcp_recv(kcp_, recv_buffer_.data(), recv_buffer_.max_size())) > 0)
     {
-        if (!channel->handleData(recv_buffer_.data(), ret))
+        if (!channel_ptr->handleData(recv_buffer_.data(), ret))
         {
             ERROR_LOG << "handle_data failed...." << std::endl;
             closeSocket();

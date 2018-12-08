@@ -5,6 +5,10 @@
 
 void backTrace()
 {
+    // create coredump file
+    std::cerr << "raise SIGABRT\n";
+    raise(SIGABRT);
+
     const uint32_t size = 50;
     void* array[size];
     int stack_num = backtrace(array, size);
@@ -14,10 +18,6 @@ void backTrace()
     int fd = open("core.backtrace", O_CREAT | O_WRONLY, 00777);
     backtrace_symbols_fd(array, stack_num, fd);
     close(fd);
-
-    // create coredump file
-    std::cerr << "raise SIGABRT\n";
-    raise(SIGABRT);
 
     exit(0);
 }

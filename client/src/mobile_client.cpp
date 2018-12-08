@@ -134,13 +134,13 @@ void MobileClient::onConnected(ConnectionPtr conn, bool connected)
     }
 
     // 构造conn <--> channel <--> service 关系
-    auto channel = client_ptr_->getChannel().lock();
-    if (!channel)
+    auto channel_ptr = client_ptr_->getChannel();
+    if (!channel_ptr)
     {
-        channel = std::make_shared<RpcChannel>(client_ptr_);
-        client_ptr_->setChannel(channel);
+        auto channel = std::make_shared<RpcChannel>(client_ptr_);
+        client_ptr_->setChannel(channel_ptr);
 
-        service_->setChannel(channel);
+        service_->setChannel(channel_ptr);
         service_->setParam(this->param);
         channel->setService(service_);
     }

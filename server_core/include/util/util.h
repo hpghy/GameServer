@@ -80,5 +80,12 @@ inline uint64 stamp_millisecond()
 
 void backTrace();
 
+enum class ConnStatus
+{
+    STATUS_DISCONNECTED = 0,
+    STATUS_CONNECTING = 1,
+    STATUS_CONNECTED = 2,
+};
+
 
 #endif

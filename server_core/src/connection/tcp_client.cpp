@@ -41,14 +41,12 @@ void TcpClient::asyncConnect()
     DEBUG_LOG << "asyncConnect....";
     auto self = std::dynamic_pointer_cast<TcpClient>(shared_from_this());
     getSendStrand()->post([self]() { self->doAsyncConnect(); });
-    //getSendStrand()->post(std::bind(&TcpClient::doAsyncConnect,
-    //                                std::static_pointer_cast<TcpClient>(shared_from_this())));
 }
 
 // io线程执行
 void TcpClient::doAsyncConnect()
 {
-    if (status_ == Status::STATUS_CONNECTING)
+    if (status_ == ConnStatus::STATUS_CONNECTING)
     {
         return;
     }
@@ -57,7 +55,7 @@ void TcpClient::doAsyncConnect()
         ERROR_LOG << "No connect_cb";
         return;
     }
-    status_ = Status::STATUS_CONNECTING;
+    status_ = ConnStatus::STATUS_CONNECTING;
     auto self = std::dynamic_pointer_cast<TcpClient>(shared_from_this());
     getSocket().async_connect(remote_addr_, getSendStrand()->wrap([self](const boost_err & ec) { self->handleConnect(ec); }));
 }
@@ -67,13 +65,13 @@ void TcpClient::handleConnect(const boost_err& ec)
 {
     if (!ec)
     {
-        status_ = Status::STATUS_CONNECTED;
+        status_ = ConnStatus::STATUS_CONNECTED;
         onConnected();
         return;
     }
 
     WARN_LOG << "TcpClient connect " << getRemoteAddr() << " failed: " << ec.value() << " " << ec.message() << std::endl;
-    status_ = Status::STATUS_DISCONNECTED;
+    status_ = ConnStatus::STATUS_DISCONNECTED;
 
     reconnect_timer_.expires_from_now(boost::posix_time::seconds(reconnect_interval_));
     auto self = std::dynamic_pointer_cast<TcpClient>(shared_from_this());
@@ -90,7 +88,7 @@ void TcpClient::reconnectTimer(const boost::system::error_code& ec)
         WARN_LOG << "reconnectTimer ec: " << ec.value() << " msg: " << ec.message();
         return;
     }
-    status_ = Status::STATUS_CONNECTING;
+    status_ = ConnStatus::STATUS_CONNECTING;
     boost::system::error_code error;
     getSocket().close(error);
     if (error)
@@ -103,7 +101,7 @@ void TcpClient::reconnectTimer(const boost::system::error_code& ec)
 
 void TcpClient::onConnected()
 {
-    bool connected = (Status::STATUS_CONNECTED == status_);
+    bool connected = (ConnStatus::STATUS_CONNECTED == status_);
     INFO_LOG << "TcpClient onConnected " << connected;
     auto self = std::static_pointer_cast<TcpClient>(shared_from_this());
     auto callback = [self, connected](void)

@@ -49,7 +49,7 @@ void KcpClient::asyncConnect()
 
 void KcpClient::doAsyncConnect()
 {
-    if (status_ == Status::STATUS_CONNECTING)
+    if (status_ == ConnStatus::STATUS_CONNECTING)
     {
         return;
     }
@@ -63,7 +63,7 @@ void KcpClient::doAsyncConnect()
 
 void KcpClient::doConnect()
 {
-    status_ = Status::STATUS_CONNECTING;
+    status_ = ConnStatus::STATUS_CONNECTING;
     boost_err ec;
     getSocket().connect(remote_addr_, ec);
     if (ec)
@@ -115,9 +115,9 @@ void KcpClient::handleReceiveSync(const boost_err& ec, std::size_t bytes)
         ERROR_LOG << "handleReceiveSync ec: " << ec.value() << " message: " << ec.message();
         return;
     }
-    if (status_ != Status::STATUS_CONNECTING)
+    if (status_ != ConnStatus::STATUS_CONNECTING)
     {
-        WARN_LOG << "status_ != Status::STATUS_CONNECTING!";
+        WARN_LOG << "status_ != ConnStatus::STATUS_CONNECTING!";
         return;
     }
 
@@ -142,56 +142,16 @@ void KcpClient::handleReceiveSync(const boost_err& ec, std::size_t bytes)
     }
 }
 
-/*
-// io线程里面执行
-void KcpClient::handleConnect(const boost_err& ec)
-{
-    if (!ec)
-    {
-        status_ = Status::STATUS_CONNECTED;
-        onConnected(true);
-        return;
-    }
-
-    WARN_LOG << "KcpClient connect " << getRemoteAddr() << " failed: " << ec.value() << " " << ec.message() << std::endl;
-    status_ = Status::STATUS_DISCONNECTED;
-
-    reconnect_timer_.expires_from_now(boost::posix_time::seconds(reconnect_interval_));
-    auto self = std::dynamic_pointer_cast<KcpClient>(shared_from_this());
-    reconnect_timer_.async_wait(getKcpStrand()->wrap([self](const boost_err & ec) { self->reconnectTimer(ec); }));
-    reconnect_interval_ = std::min(reconnect_max_interval, reconnect_interval_ * 2);
-}
-
-// io线程执行, 使用getKcpStrand()保护
-void KcpClient::reconnectTimer(const boost::system::error_code& ec)
-{
-    DEBUG_LOG << "reconnectTimer: " << getRemoteAddr();
-    if (ec)
-    {
-        WARN_LOG << "reconnectTimer ec: " << ec.value() << " msg: " << ec.message();
-        return;
-    }
-    status_ = Status::STATUS_CONNECTING;
-    boost::system::error_code error;
-    getSocket().close(error);
-    if (error)
-    {
-        WARN_LOG << "close error: " << error.message();
-    }
-    doConnect();
-}
-*/
-
 void KcpClient::onConnected(bool is_connected)
 {
     DEBUG_LOG << "onConnected is_connected: " << is_connected;
-    status_ = is_connected ? Status::STATUS_CONNECTED : Status::STATUS_DISCONNECTED;
+    status_ = is_connected ? ConnStatus::STATUS_CONNECTED : ConnStatus::STATUS_DISCONNECTED;
     onConnected();
 }
 
 void KcpClient::onConnected()
 {
-    bool connected = (Status::STATUS_CONNECTED == status_);
+    bool connected = (ConnStatus::STATUS_CONNECTED == status_);
     INFO_LOG << "KcpClient onConnected " << connected;
     auto self = std::static_pointer_cast<KcpClient>(shared_from_this());
     auto callback = [self, connected](void)

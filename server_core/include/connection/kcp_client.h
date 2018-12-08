@@ -25,12 +25,6 @@ class MobileClient;
 class KcpClient: public KcpConnection
 {
     public:
-        enum class Status
-        {
-            STATUS_DISCONNECTED = 0,
-            STATUS_CONNECTING = 1,
-            STATUS_CONNECTED = 2,
-        };
         const static uint32_t connect_timeout = 10;
         const static uint32_t reconnect_max_interval;
         using KcpClientPtr = std::shared_ptr<KcpClient>;
@@ -62,13 +56,12 @@ class KcpClient: public KcpConnection
         bool directSendData(const char* data, std::size_t bytes);
         void asyncReceiveSync();
         void handleReceiveSync(const boost_err& ec, std::size_t bytes);
-        void reconnectTimer(const boost::system::error_code& ec);
         void handleConnect(const boost_err&);
         void handleCloseSocket() override;
 
     private:
         udp_addr 		remote_addr_;
-        Status 	        status_ = Status::STATUS_DISCONNECTED;
+        ConnStatus 	    status_ = ConnStatus::STATUS_DISCONNECTED;
         std::function<void(KcpClientPtr, bool)> connect_cb_;
         std::function<void(KcpClientPtr)> disconnect_cb_;
         boost::asio::deadline_timer     reconnect_timer_;

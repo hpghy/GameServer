@@ -26,12 +26,6 @@
 class TcpClient: public TcpConnection
 {
     public:
-        enum class Status
-        {
-            STATUS_DISCONNECTED = 0,
-            STATUS_CONNECTING = 1,
-            STATUS_CONNECTED = 2,
-        };
         const static uint32_t reconnect_max_interval;
         using TcpClientPtr = std::shared_ptr<TcpClient>;
 
@@ -63,7 +57,7 @@ class TcpClient: public TcpConnection
 
     protected:
         tcp_addr 		remote_addr_;
-        Status 	        status_ = Status::STATUS_DISCONNECTED;
+        ConnStatus 	    status_ = ConnStatus::STATUS_DISCONNECTED;
         std::function<void(TcpClientPtr, bool)> connect_cb_;
         std::function<void(TcpClientPtr)> disconnect_cb_;
         boost::asio::deadline_timer     reconnect_timer_;

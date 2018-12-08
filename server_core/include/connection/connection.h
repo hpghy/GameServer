@@ -4,7 +4,6 @@
  * $Id$
  *
  **************************************************************************/
-
 /**
 * @file connection.h
 * @author hpghy(790042744@qq.com)
@@ -47,7 +46,7 @@ class Connection: private boost::noncopyable, public std::enable_shared_from_thi
         // connection创建时在主线程中初始化, TODO...做成init接口更好
         void setChannel(std::shared_ptr<RpcChannel> channel_ptr) { channel_wptr_ = channel_ptr; }
         // 各个线程都可以调用getChannel
-        std::weak_ptr<RpcChannel> getChannel() { return channel_wptr_; }
+        std::shared_ptr<RpcChannel> getChannel() { return channel_wptr_.lock(); }
 
         // 主线程执行
         virtual void startWork();

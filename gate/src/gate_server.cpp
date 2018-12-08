@@ -106,8 +106,7 @@ void GateServer::onDisconnected(ConnectionPtr conn)
     MobileServer::onDisconnected(conn);
 
     // 需要移除DeviceClient
-    auto channel_wptr = conn->getChannel();
-    auto channel_ptr = channel_wptr.lock();
+    auto channel_ptr = conn->getChannel();
     if (!channel_ptr)
     {
         WARN_LOG << "channel_wptr.lock return nullptr";

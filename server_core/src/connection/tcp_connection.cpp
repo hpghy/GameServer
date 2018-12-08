@@ -84,7 +84,7 @@ void TcpConnection::handleReceive(const boost_err& ec, std::size_t length)
         return;
     }
 
-    auto channel_ptr = getChannel().lock();
+    auto channel_ptr = getChannel();
     if (!channel_ptr)
     {
         ERROR_LOG << "TcpConnection channel_ptr is null";
